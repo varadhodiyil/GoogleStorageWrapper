@@ -8,32 +8,45 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 
 class GoogleStorage:
-    def __init__(self, bucket_name, credentials_path):
-        self.BUCKET_NAME = bucket_name
+    def __init__(self, credentials_path, bucket_name=None):
+        """
+            Initiate Google Storage by passing two arugments[Credentials path]
+            @credentials_path: path navigating Google Auth JSON file.
+        """
         self.CREDENTIALS_JSON = credentials_path
+        self.BUCKET_NAME = bucket_name
 
     def setBucketName(self, bucket):
+        """
+            Set Bucket Name for usage.
+        """
         self.BUCKET_NAME = bucket
-	
-	def setCredentialsPath(self, credentials_path):
-		self.CREDENTIALS_JSON = credentials_path
 
-    def create_service(self):
+    def __create_service(self):
         # Get the application default credentials. When running locally, these are
         # available after running `gcloud init`. When running on compute
         # engine, these are available from the environment.
-        #credentials = GoogleCredentials.get_application_default()
+        # credentials = GoogleCredentials.get_application_default()
         # Construct the service object for interacting with the Cloud Storage API -
         # the 'storage' service, at version 'v1'.
         # You can browse other available api services and versions here:
         #     http://g.co/dev/api-client-library/python/apis/
         credentials = ServiceAccountCredentials.from_json_keyfile_name(
             self.CREDENTIALS_JSON)
-        #credentials = flow_from_clientsecrets('google-services.json')
         return discovery.build('storage', 'v1', credentials=credentials)
 
-    def upload_object(self, filename, readers=[], predefinedAcl='authenticatedRead', owners=[], name=None):
-        service = self.create_service()
+    def upload_object(self, file_path, file_name=None, predefinedAcl='authenticatedRead', 
+                readers=[], owners=[]):
+        """
+            upload object: pass file path to upload into GCS.
+            file_path: file path of which needs to uploaded.
+            file_name: Name of file to store in the GCS.
+            predefinedAcl: by default 'authenticatedRead'.
+            readers: if needed can be defined the person for read access.
+            owner: if needed can be defined for the ownership.
+        """
+        
+        service = self.__create_service()
         # This is the request body as specified:
         # http://g.co/cloud/storage/docs/json_api/v1/objects/insert#request
         if not name:
@@ -78,14 +91,14 @@ class GoogleStorage:
 
     def get_bucket_metadata(self):
         """Retrieves metadata about the given bucket."""
-        service = self.create_service()
+        service = self.__create_service()
         # Make a request to buckets.get to retrieve a list of objects in the
         # specified bucket.
         req = service.buckets().get(bucket=self.BUCKET_NAME)
         return req.execute()
 
     def create_bucket(self, project_id):
-        service = self.create_service()
+        service = self.__create_service()
         # Make a request to buckets.get to retrieve a list of objects in the
         # specified bucket.
         body = {
@@ -102,7 +115,7 @@ class GoogleStorage:
 
     def list_bucket(self):
         """Returns a list of metadata of the objects within the given bucket."""
-        service = self.create_service()
+        service = self.__create_service()
         # Create a request to objects.list to retrieve a list of objects.
         fields_to_return = \
             'nextPageToken,items(name,size,contentType,metadata(my-key))'
@@ -117,7 +130,7 @@ class GoogleStorage:
         return all_objects
 
     def get_object(self, filename, out_file):
-        service = self.create_service()
+        service = self.__create_service()
         # Use get_media instead of get to get the actual contents of the object.
         # http://g.co/dev/resources/api-libraries/documentation/storage/v1/python/latest/storage_v1.objects.html#get_media
         req = service.objects().get_media(bucket=self.BUCKET_NAME, object=filename)
@@ -129,7 +142,7 @@ class GoogleStorage:
         return out_file
 
     def delete_object(self, filename):
-        service = self.create_service()
+        service = self.__create_service()
         req = service.objects().delete(bucket=self.BUCKET_NAME, object=filename)
         resp = req.execute()
         return resp

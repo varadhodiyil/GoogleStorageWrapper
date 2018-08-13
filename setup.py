@@ -21,12 +21,13 @@ def package_files(directory):
 setup(
     name="GoogleStorage",
     version="1.0",
-    author="Madhan M",
-    author_email="varadhodiyil@gmail.com",
+    author="Sachin Edward",
+    author_email="edward9494@gmail.com",
     description="Google Cloud storage Wrapper",
-    url="",
+    url="https://github.com/sachinedward/GoogleStorageWrapper",
     packages=['GoogleStorage'],
     include_package_data=True,
     package_dir={'GoogleStorage': "src/"},
     package_data={'GoogleStorage': package_files('src/')},
+    install_requires=['google-cloud', 'google-api-python-client']
 )
