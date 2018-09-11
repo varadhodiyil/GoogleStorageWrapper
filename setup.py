@@ -27,7 +27,7 @@ setup(
     url="https://github.com/sachinedward/GoogleStorageWrapper",
     packages=['GoogleStorage'],
     include_package_data=True,
-    package_dir={'GoogleStorage': "src/"},
+    package_dir={'GoogleStorage': "src"},
     package_data={'GoogleStorage': package_files('src/')},
     install_requires=['google-cloud', 'google-api-python-client']
 )
